@@ -30,16 +30,19 @@ module RegisterFile(rs1_addr, rs2_addr, rs1_out, rs2_out, rd_addr, rd_data, writ
         end
 endmodule
 
-module Alu(in1, in2, out, func);
+module Alu(in1, in2, out, func, alu_branch);
         input [31:0] in1, in2;
         input [9:0] func;
         output reg [31:0] out;
+        output reg [2:0] alu_branch;
+        wire  [31:0] sub;
 
+        assign sub = in1 - in2;
 
         always @(*) begin
                 case(func)
                         10'b0000000_000: out = in1 +   in2;
-                        10'b0100000_000: out = in1 -   in2;
+                        10'b0100000_000: out = sub;
                         10'b0000000_001: out = in1 <<  in2[4:0];
                         10'b0000000_100: out = in1 ^   in2;
                         10'b0000000_101: out = in1 >>  in2[4:0];
@@ -48,6 +51,10 @@ module Alu(in1, in2, out, func);
                         10'b0000000_111: out = in1 &   in2;
                 endcase
         end
+
+        assign alu_branch[`EQ_IDX]  = in1 == in2;
+        assign alu_branch[`LTS_IDX] = (in1[31] != in2[31]) ? in2[31] : sub[31];
+        assign alu_branch[`LTU_IDX] = in1 <  in2;
 
 endmodule
 

@@ -12,12 +12,17 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         wire            [31:0] rs2_out;
         wire            [04:0] rd_addr;
         reg             [31:0] rd_data;
-        wire            [31:0] aluout;
-        wire            [09:0] ALUfunc;
-        wire            [09:0] ALUfunc_s;
+        wire            [31:0] alu_out;
+        wire            [09:0] alu_func;
+        wire            [09:0] alu_func_s;
+        wire            [02:0] alu_branch
 
         reg             [31:0] pc               = 32'b0;
         wire            [31:0] pc_p4;
+        wire            [31:0] pc_p_brch;
+        wire                   cond_branch;
+        wire                   taken;
+        wire            [05:0] cond_func;
         reg             [31:0] pc_next;
         reg             [01:0] mux_pc           = 2'b0;
         wire            [09:0] instruction_type;
@@ -35,24 +40,44 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 pc <= pc_next;
         end
 
-        assign pc_p4 = pc + 1;
+        assign pc_p4               = pc + 1;
+        assign pc_p_brch           = pc + imm_b;
         assign address_instruction = pc;
+        assign taken               = control[`COND_BR_IDX] & cond_branch;
 
         always @ (mux_pc, pc_p4) begin
-                case(mux_pc)
-                        2'b00:   pc_next = pc_p4;
-                        default: pc_next = pc_p4;
+                case({control[`BRANCH_ENC], taken})
+                        `NO_BRANCH_SEL:  pc_next = pc_p4;
+                        `COND_BR_SEL:    pc_next = pc_p_brch;
+                        `JAL_SEL:        pc_next = pc_p4;
+                        `JALR_SEL:       pc_next = pc_p4;
+                        default:         pc_next = pc_p4;
                 endcase
         end
 
-        assign rs1_addr  = instruction[19:15];
-        assign rs2_addr  = instruction[24:20];
-        assign rd_addr   = instruction[11:07];
-        assign imm_u     = instruction[31:12] << 12;
-        assign imm_i     = {{20{instruction[31]}}, instruction[31:20]};
-        assign imm_s     = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]}; // could use imm_i?
-        assign ALUfunc   = control[`ALU_FUNC_MUX]  ? ALUfunc_s : 10'b0;
-        assign ALUfunc_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
+        always @ (alu_branch, cond_branch) begin
+                case(cond_func)
+                        `BEQ:    cond_branch =  alu_branch[`EQ_IDX];
+                        `BNE:    cond_branch = ~alu_branch[`EQ_IDX];
+                        `BLT:    cond_branch =  alu_branch[`LTS_IDX];
+                        `BGE:    cond_branch = ~alu_branch[`LTS_IDX];
+                        `BLTU:   cond_branch =  alu_branch[`LTU_IDX];
+                        `BGEU:   cond_branch = ~alu_branch[`LTU_IDX];
+                        default: cond_branch = 0;
+                endcase
+        end
+
+        assign rs1_addr   = instruction[19:15];
+        assign rs2_addr   = instruction[24:20];
+        assign rd_addr    = instruction[11:07];
+        assign imm_u      = instruction[31:12] << 12;
+        assign imm_i      = {{20{instruction[31]}}, instruction[31:20]};
+        assign imm_s      = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]}; // could use imm_i?
+        assign imm_b      = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0}
+        assign imm_j      = {{20{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0}
+        assign alu_func   = control[`ALU_FUNC_MUX]  ? alu_func_s : 10'b0;
+        assign alu_func_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
+        assign branch_func= instruction[14:12];
 
         assign instruction_type[`LUI_IDX  ] = ((instruction & `UJ_MASK)   == `LUI_OP  ) | 10'b0;
         assign instruction_type[`AUIPC_IDX] = ((instruction & `UJ_MASK)   == `AUIPC_OP) | 10'b0;
@@ -96,7 +121,11 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 case(instruction_type)
                         `LUI:    control = `LUI_CTRL;
                         `ALUI:   control = `ALUI_CTRL;
-                        `ALUR:   control = `ALUR_CTRL;
+                        `ALUI:   control = `ALUI_CTRL;
+                        `LODS:   control = `LODS_CTRL;
+                        `BRCH:   control = `BRCH_CTRL;
+                        `JAL:    control = `JAL_CTRL;
+                        `JALR:   control = `JALR_CTRL;
                         default: control = `NOP;
                 endcase
         end
@@ -120,13 +149,14 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         Alu ALU(
                 .in1(alu_in1),
                 .in2(alu_in2),
-                .out(aluout),
-                .func(ALUfunc)
+                .out(alu_out),
+                .func(alu_func),
+                .alu_branch(alu_branch)
         );
 
-        always @(data_in, pc_p4, aluout, control) begin
+        always @(data_in, pc_p4, alu_out, control) begin
                 case(control[`WRB_REGF_MUX])
-                        `ALUOUT_SEL: rd_data <= aluout;
+                        `ALUOUT_SEL: rd_data <= alu_out;
                         `PC_P_4_SEL: rd_data <= pc_p4;
                         `DTAMEM_SEL: rd_data <= data_in;
                 endcase

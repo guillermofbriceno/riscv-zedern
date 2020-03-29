@@ -6,7 +6,7 @@ module computer(
                 output wire [31:0] instruction
         );
         
-        reg [31:0] data_in = 32'b0;
+        wire [31:0] data_in;
         wire [31:0] data_out;
         wire [31:0] address_instruction;
         wire [31:0] address_data;
@@ -27,6 +27,15 @@ module computer(
                 .data_in(data_out),
                 .write(write),
                 .data_out(instruction)
+        );
+
+        MemoryUnit DATAMEM(
+                .clk(clk),
+                .address(address_data),
+                .data_in(data_out),
+                .write(write),
+                .data_out(data_in)
+
         );
 
         clock_gen #(23) CLKGEN(

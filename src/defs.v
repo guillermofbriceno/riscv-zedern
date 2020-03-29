@@ -80,11 +80,15 @@
 `define JAL             12'h100
 `define JALR            12'h200
 
-//                         7 6 5 43 21 0     
-`define LUI_CTRL        8'b0_0_1_00_00_0
-`define ALUI_CTRL       8'b0_1_1_00_10_1
-`define ALUR_CTRL       8'b1_1_1_00_00_1
-`define NOP             8'b0_0_0_00_00_0
+//                          A98 7 6 5 43 21 0     
+`define LUI_CTRL        10'b000_0_0_1_00_00_0
+`define ALUI_CTRL       10'b000_0_1_1_00_10_1
+`define ALUR_CTRL       10'b000_1_1_1_00_00_1
+`define LODS_CTRL       10'b000_0_0_1_10_10_1
+`define NOP             10'b000_0_0_0_00_00_0
+`define BRCH_CTL        10'b001_0_0_0_00_00_0 //Not impl
+`define JAL_CTRL        10'b010_0_0_1_01_00_0
+`define JALR_CTRL       10'b100_0_0_0_00_00_0 //Not impl
 
 
 // Control signal indexes
@@ -113,3 +117,24 @@
 `define FUNCT7_DIS      0
 `define FUNCT7_SEL      1
 
+`define BRANCH_ENC      10:8
+`define NO_BRANCH_SEL   4'b0000
+`define JAL_SEL         4'b0010
+`define JALR_SEL        4'b0100
+`define COND_BR_SEL     4'b0001
+`define COND_BR_IDX     8
+
+
+
+
+//Condition Indexes
+`define EQ_IDX          0
+`define LTS_IDX         1
+`define LTU_IDX         2
+
+`define BEQ             3'b000
+`define BNE             3'b001
+`define BLT             3'b100
+`define BGE             3'b101
+`define BLTU            3'b110
+`define BGEU            3'b111
