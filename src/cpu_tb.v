@@ -2,13 +2,14 @@
 
 module cpu_tb();
         
-        reg clk;
+        reg clk = 0;
         wire [31:0] instruction;
         reg [31:0] data_in = 32'b0;
         wire [31:0] data_out;
         wire [31:0] address_instruction;
         wire [31:0] address_data;
         reg write = 0;
+        integer i = 0;
 
         Cpu CPU(
                 .clk(clk), 
@@ -31,50 +32,15 @@ module cpu_tb();
                 $dumpfile("cpu_test.vcd");
                 $dumpvars(0, CPU);
                 $dumpvars(0, BootROM);
-               
-                clk = 0;
-                
-                #20
-                
-                clk = 1;
-
-                #20;
-
-                clk = 0;
-
-                #20;
-
-                clk = 1;
-
-                #20;
-
-                clk = 0;
-
-                #20;
-
-                clk = 1;
-
-                #20;
-
-                clk = 0;
-
-                #20;
-
-                clk = 1;
+                #1;
+                for (i=0; i < 10; i=i+1) begin
+                        clk = 1;
+                        #1;
+                        clk = 0;
+                        #1;
+                end
 
                 #20
-
-                clk = 0;
-
-                #20
-
-                clk = 1;
-
-                #20
-
-                clk = 0;
-
-                #20;
 
                 $finish;
         end
