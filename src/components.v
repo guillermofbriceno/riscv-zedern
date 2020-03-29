@@ -1,3 +1,5 @@
+`include "defs.v"
+
 // CPU components
 module RegisterFile(rs1_addr, rs2_addr, rs1_out, rs2_out, rd_addr, rd_data, write, clk);
         input [4:0] rs1_addr, rs2_addr, rd_addr;
@@ -50,11 +52,12 @@ module Alu(in1, in2, out, func, alu_branch);
                         10'b0000000_110: out = in1 |   in2;
                         10'b0000000_111: out = in1 &   in2;
                 endcase
+
+                alu_branch[`EQ_IDX]  = in1 == in2;
+                alu_branch[`LTS_IDX] = (in1[31] != in2[31]) ? in2[31] : sub[31];
+                alu_branch[`LTU_IDX] = in1 <  in2;
         end
 
-        assign alu_branch[`EQ_IDX]  = in1 == in2;
-        assign alu_branch[`LTS_IDX] = (in1[31] != in2[31]) ? in2[31] : sub[31];
-        assign alu_branch[`LTU_IDX] = in1 <  in2;
 
 endmodule
 
@@ -65,27 +68,26 @@ module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         input [bits_addr - 1:0] address,
         input [bits_data - 1:0] data_in,
         input write,
-        output reg [bits_data - 1:0] data_out
+        output wire [bits_data - 1:0] data_out
         );
 
-        reg [bits_data - 1:0] memory [0:entries - 1];
+        //reg [bits_data - 1:0] memory [0:entries - 1];
+        reg [7:0] memory [0:entries - 1];
 
         initial begin
-                memory[0] = 32'b00000010000000000000_10000_0110111; //LUI x16,0x2000
-                memory[1] = 32'b111111111111_01111_000_01111_0010011; //ADDI x15,x15,-1
-                memory[2] = 32'b000000000010_01111_000_01111_0010011; //ADDI x15,x15,2
-                memory[3] = 32'b0000000_01111_10000_000_01111_0110011; //ADD  x15,x16,x15
-                
+                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/image.hex", memory);
         end
 
         always @(posedge clk) begin
                 if (write) begin
-                        memory[address] <= data_in;
-                end
-                else begin
-                        data_out <= memory[address];
+                        memory[address]   <= data_in[31:24];
+                        memory[address+1] <= data_in[23:16];
+                        memory[address+2] <= data_in[15:08];
+                        memory[address+3] <= data_in[07:00];
                 end
         end
+
+        assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
 endmodule
 
 module clock_gen #(parameter clock_tap = 21)(in_clk, out_clk);
