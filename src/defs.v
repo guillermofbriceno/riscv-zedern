@@ -81,14 +81,14 @@
 `define JALR            12'h200
 
 //                          A98 7 6 5 43 21 0     
-`define LUI_CTRL        10'b000_0_0_1_00_00_0
-`define ALUI_CTRL       10'b000_0_1_1_00_10_1
-`define ALUR_CTRL       10'b000_1_1_1_00_00_1
-`define LODS_CTRL       10'b000_0_0_1_10_10_1
-`define NOP             10'b000_0_0_0_00_00_0
-`define BRCH_CTL        10'b001_0_0_0_00_00_0 //Not impl
-`define JAL_CTRL        10'b010_0_0_1_01_00_0
-`define JALR_CTRL       10'b100_0_0_0_00_00_0 //Not impl
+`define LUI_CTRL        11'b000_0_0_1_00_00_0
+`define ALUI_CTRL       11'b000_0_1_1_00_10_1
+`define ALUR_CTRL       11'b000_1_1_1_00_00_1
+`define LODS_CTRL       11'b000_0_0_1_10_10_1
+`define NOP             11'b000_0_0_0_00_00_0
+`define BRCH_CTRL       11'b001_0_0_0_00_00_1 //Not impl
+`define JAL_CTRL        11'b010_0_0_1_01_00_0
+`define JALR_CTRL       11'b100_0_0_0_00_00_0 //Not impl
 
 
 // Control signal indexes
@@ -119,9 +119,9 @@
 
 `define BRANCH_ENC      10:8
 `define NO_BRANCH_SEL   4'b0000
-`define JAL_SEL         4'b0010
-`define JALR_SEL        4'b0100
-`define COND_BR_SEL     4'b0001
+`define JAL_SEL         4'b0100
+`define JALR_SEL        4'b1000
+`define COND_BR_SEL     4'b0011
 `define COND_BR_IDX     8
 
 

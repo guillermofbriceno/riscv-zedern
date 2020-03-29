@@ -15,14 +15,14 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         wire            [31:0] alu_out;
         wire            [09:0] alu_func;
         wire            [09:0] alu_func_s;
-        wire            [02:0] alu_branch
+        wire            [02:0] alu_branch;
 
         reg             [31:0] pc               = 32'b0;
         wire            [31:0] pc_p4;
         wire            [31:0] pc_p_brch;
-        wire                   cond_branch;
+        reg                    cond_branch;
         wire                   taken;
-        wire            [05:0] cond_func;
+        wire            [02:0] branch_func;
         reg             [31:0] pc_next;
         reg             [01:0] mux_pc           = 2'b0;
         wire            [09:0] instruction_type;
@@ -30,23 +30,29 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         wire            [31:0] imm_u;
         wire            [31:0] imm_i;
         wire            [31:0] imm_s;
+        wire            [12:0] imm_b;
 
         reg             [31:0] alu_in1          = 32'b0;
         reg             [31:0] alu_in2          = 32'b0;
 
         reg             [01:0] mux_wb;
 
+
+        wire            [03:0] branch_temp;
+
         always @ (posedge clk) begin
                 pc <= pc_next;
         end
 
-        assign pc_p4               = pc + 1;
+        assign pc_p4               = pc + 4;
         assign pc_p_brch           = pc + imm_b;
         assign address_instruction = pc;
         assign taken               = control[`COND_BR_IDX] & cond_branch;
 
-        always @ (mux_pc, pc_p4) begin
-                case({control[`BRANCH_ENC], taken})
+        assign branch_temp = {control[`BRANCH_ENC], taken};
+
+        always @ (branch_temp, pc_p4, pc_p_brch) begin
+                case(branch_temp)
                         `NO_BRANCH_SEL:  pc_next = pc_p4;
                         `COND_BR_SEL:    pc_next = pc_p_brch;
                         `JAL_SEL:        pc_next = pc_p4;
@@ -55,8 +61,8 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 endcase
         end
 
-        always @ (alu_branch, cond_branch) begin
-                case(cond_func)
+        always @ (alu_branch, cond_branch, branch_func) begin
+                case(branch_func)
                         `BEQ:    cond_branch =  alu_branch[`EQ_IDX];
                         `BNE:    cond_branch = ~alu_branch[`EQ_IDX];
                         `BLT:    cond_branch =  alu_branch[`LTS_IDX];
@@ -73,8 +79,8 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         assign imm_u      = instruction[31:12] << 12;
         assign imm_i      = {{20{instruction[31]}}, instruction[31:20]};
         assign imm_s      = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]}; // could use imm_i?
-        assign imm_b      = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0}
-        assign imm_j      = {{20{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0}
+        assign imm_b      = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};
+        assign imm_j      = {{20{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0};
         assign alu_func   = control[`ALU_FUNC_MUX]  ? alu_func_s : 10'b0;
         assign alu_func_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
         assign branch_func= instruction[14:12];
@@ -121,7 +127,7 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 case(instruction_type)
                         `LUI:    control = `LUI_CTRL;
                         `ALUI:   control = `ALUI_CTRL;
-                        `ALUI:   control = `ALUI_CTRL;
+                        `ALUR:   control = `ALUR_CTRL;
                         `LODS:   control = `LODS_CTRL;
                         `BRCH:   control = `BRCH_CTRL;
                         `JAL:    control = `JAL_CTRL;
