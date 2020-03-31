@@ -82,13 +82,14 @@
 
 //                          A98 7 6 5 43 21 0     
 `define LUI_CTRL        11'b000_0_0_1_00_00_0
+`define AUIPC_CTRL      11'b000_0_0_1_00_11_0
 `define ALUI_CTRL       11'b000_0_1_1_00_10_1
 `define ALUR_CTRL       11'b000_1_1_1_00_00_1
 `define LODS_CTRL       11'b000_0_0_1_10_10_1
 `define NOP             11'b000_0_0_0_00_00_0
-`define BRCH_CTRL       11'b001_0_0_0_00_00_1 //Not impl
+`define BRCH_CTRL       11'b001_0_0_0_00_00_1
 `define JAL_CTRL        11'b010_0_0_1_01_00_0
-`define JALR_CTRL       11'b100_0_0_0_00_00_0 //Not impl
+`define JALR_CTRL       11'b100_0_0_1_01_00_0 //Implementation not verified
 
 
 // Control signal indexes

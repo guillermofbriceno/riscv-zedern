@@ -20,6 +20,8 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         reg             [31:0] pc               = 32'b0;
         wire            [31:0] pc_p4;
         wire            [31:0] pc_p_brch;
+        wire            [31:0] pc_p_jmp;
+        wire            [31:0] pc_rs1_p_i;
         reg                    cond_branch;
         wire                   taken;
         wire            [02:0] branch_func;
@@ -31,6 +33,7 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         wire            [31:0] imm_i;
         wire            [31:0] imm_s;
         wire            [12:0] imm_b;
+        wire            [31:0] imm_j;
 
         reg             [31:0] alu_in1          = 32'b0;
         reg             [31:0] alu_in2          = 32'b0;
@@ -46,6 +49,8 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
 
         assign pc_p4               = pc + 4;
         assign pc_p_brch           = pc + imm_b;
+        assign pc_p_jmp            = pc + imm_j;
+        assign pc_rs1_p_i          = pc + rs1_out;
         assign address_instruction = pc;
         assign taken               = control[`COND_BR_IDX] & cond_branch;
 
@@ -55,7 +60,7 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 case(branch_temp)
                         `NO_BRANCH_SEL:  pc_next = pc_p4;
                         `COND_BR_SEL:    pc_next = pc_p_brch;
-                        `JAL_SEL:        pc_next = pc_p4;
+                        `JAL_SEL:        pc_next = pc_p_jmp;
                         `JALR_SEL:       pc_next = pc_p4;
                         default:         pc_next = pc_p4;
                 endcase
@@ -126,6 +131,7 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         always @ (instruction_type) begin
                 case(instruction_type)
                         `LUI:    control = `LUI_CTRL;
+                        `AUIPC:  control = `AUIPC_CTRL;
                         `ALUI:   control = `ALUI_CTRL;
                         `ALUR:   control = `ALUR_CTRL;
                         `LODS:   control = `LODS_CTRL;
