@@ -90,6 +90,48 @@ module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
 endmodule
 
+module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
+        input clk,
+        input [bits_addr - 1:0] address,
+        input [bits_data - 1:0] data_in,
+        input [1:0] width,
+        input write,
+        output wire [bits_data - 1:0] data_out
+        );
+
+        reg [7:0] memory [0:entries - 1];
+
+        initial begin
+                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/empty.hex", memory);
+                $dumpvars(0, memory[0]);
+                $dumpvars(0, memory[1]);
+                $dumpvars(0, memory[2]);
+                $dumpvars(0, memory[3]);
+        end
+
+        always @(posedge clk) begin
+                if (write) begin
+                        case (width)
+                                2'b00: begin
+                                        memory[address]   <= data_in[07:00];
+                                end
+                                2'b01: begin
+                                        memory[address+1] <= data_in[15:08];
+                                        memory[address  ] <= data_in[07:00];
+                                end
+                                2'b10: begin
+                                        memory[address+3] <= data_in[31:24];
+                                        memory[address+2] <= data_in[23:16];
+                                        memory[address+1] <= data_in[15:08];
+                                        memory[address  ] <= data_in[07:00];
+                                end
+                        endcase
+                end
+        end
+
+        assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
+endmodule
+
 module clock_gen #(parameter clock_tap = 21)(in_clk, out_clk);
         input in_clk;
         output out_clk;

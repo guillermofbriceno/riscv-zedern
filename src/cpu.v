@@ -1,10 +1,12 @@
 `include "components.v"
 `include "defs.v"
 
-module Cpu(clk, instruction, data_in, data_out, address_instruction, address_data);
+module Cpu(clk, instruction, data_in, data_out, width, address_instruction, address_data, write_mem);
         input clk; 
         input [31:0] instruction, data_in;
         output [31:0] data_out, address_instruction, address_data;
+        output [01:0] width;
+        output write_mem;
 
         wire            [04:0] rs1_addr;
         wire            [04:0] rs2_addr;
@@ -24,11 +26,11 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         wire            [31:0] pc_rs1_p_i;
         reg                    cond_branch;
         wire                   taken;
-        wire            [02:0] branch_func;
+        wire            [02:0] funct3;
         reg             [31:0] pc_next;
         reg             [01:0] mux_pc           = 2'b0;
         wire            [09:0] instruction_type;
-        reg             [10:0] control;
+        reg             [11:0] control;
         wire            [31:0] imm_u;
         wire            [31:0] imm_i;
         wire            [31:0] imm_s;
@@ -66,8 +68,8 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 endcase
         end
 
-        always @ (alu_branch, cond_branch, branch_func) begin
-                case(branch_func)
+        always @ (alu_branch, cond_branch, funct3) begin
+                case(funct3)
                         `BEQ:    cond_branch =  alu_branch[`EQ_IDX];
                         `BNE:    cond_branch = ~alu_branch[`EQ_IDX];
                         `BLT:    cond_branch =  alu_branch[`LTS_IDX];
@@ -88,7 +90,11 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
         assign imm_j      = {{20{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0};
         assign alu_func   = control[`ALU_FUNC_MUX]  ? alu_func_s : 10'b0;
         assign alu_func_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
-        assign branch_func= instruction[14:12];
+        assign funct3     = instruction[14:12];
+        assign width      = funct3[1:0];
+        assign address_data = alu_out;
+        assign data_out   = rs2_out;
+        assign write_mem  = control[`MEMWRITE_SIG];
 
         assign instruction_type[`LUI_IDX  ] = ((instruction & `UJ_MASK)   == `LUI_OP  ) | 10'b0;
         assign instruction_type[`AUIPC_IDX] = ((instruction & `UJ_MASK)   == `AUIPC_OP) | 10'b0;
@@ -132,6 +138,8 @@ module Cpu(clk, instruction, data_in, data_out, address_instruction, address_dat
                 case(instruction_type)
                         `LUI:    control = `LUI_CTRL;
                         `AUIPC:  control = `AUIPC_CTRL;
+                        `STRS:   control = `STRS_CTRL;
+                        `LODS:   control = `LODS_CTRL;
                         `ALUI:   control = `ALUI_CTRL;
                         `ALUR:   control = `ALUR_CTRL;
                         `LODS:   control = `LODS_CTRL;
