@@ -37,13 +37,14 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         wire            [12:0] imm_b;
         wire            [31:0] imm_j;
 
+        reg             [31:0] adjusted_data_in;
+
         reg             [31:0] alu_in1          = 32'b0;
         reg             [31:0] alu_in2          = 32'b0;
 
         reg             [01:0] mux_wb;
 
-
-        wire            [03:0] branch_temp;
+        wire            [03:0] cond_branch_ctrl;
 
         always @ (posedge clk) begin
                 pc <= pc_next;
@@ -56,10 +57,10 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         assign address_instruction = pc;
         assign taken               = control[`COND_BR_IDX] & cond_branch;
 
-        assign branch_temp = {control[`BRANCH_ENC], taken};
+        assign cond_branch_ctrl = {control[`BRANCH_ENC], taken};
 
-        always @ (branch_temp, pc_p4, pc_p_brch) begin
-                case(branch_temp)
+        always @ (cond_branch_ctrl, pc_p4, pc_p_brch) begin
+                case(cond_branch_ctrl)
                         `NO_BRANCH_SEL:  pc_next = pc_p4;
                         `COND_BR_SEL:    pc_next = pc_p_brch;
                         `JAL_SEL:        pc_next = pc_p_jmp;
@@ -95,6 +96,11 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         assign address_data = alu_out;
         assign data_out   = rs2_out;
         assign write_mem  = control[`MEMWRITE_SIG];
+
+        //assign load_b     = {24{deata_in[7]}, data_in[7:0]};
+        //assign load_h     = {16{deata_in[15]}, data_in[15:0]};
+        //assign load_bu    = {24'b0, data_in[7:0]};
+        //assign load_hu    = {16'b0, data_in[15:0]};           
 
         assign instruction_type[`LUI_IDX  ] = ((instruction & `UJ_MASK)   == `LUI_OP  ) | 10'b0;
         assign instruction_type[`AUIPC_IDX] = ((instruction & `UJ_MASK)   == `AUIPC_OP) | 10'b0;
@@ -174,11 +180,21 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
                 .alu_branch(alu_branch)
         );
 
+        always @(funct3) begin
+                case(funct3)
+                        `LB:     adjusted_data_in = {{24{data_in[7]}}, data_in[7:0]};
+                        `LH:     adjusted_data_in = {{16{data_in[15]}}, data_in[15:0]};
+                        `LBU:    adjusted_data_in = {24'b0, data_in[7:0]};
+                        `LHU:    adjusted_data_in = {16'b0, data_in[15:0]};
+                        default: adjusted_data_in = data_in;
+                endcase
+        end
+
         always @(data_in, pc_p4, alu_out, control) begin
                 case(control[`WRB_REGF_MUX])
                         `ALUOUT_SEL: rd_data <= alu_out;
                         `PC_P_4_SEL: rd_data <= pc_p4;
-                        `DTAMEM_SEL: rd_data <= data_in;
+                        `DTAMEM_SEL: rd_data <= adjusted_data_in;
                 endcase
         end
 

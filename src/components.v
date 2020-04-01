@@ -129,7 +129,7 @@ module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
                 end
         end
 
-        assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
+        assign data_out = {memory[address+3], memory[address+2], memory[address+1], memory[address]};
 endmodule
 
 module clock_gen #(parameter clock_tap = 21)(in_clk, out_clk);
