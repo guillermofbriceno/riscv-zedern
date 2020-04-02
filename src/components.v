@@ -75,7 +75,7 @@ module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         reg [7:0] memory [0:entries - 1];
 
         initial begin
-                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/image.hex", memory);
+                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/c_image.hex", memory);
         end
 
         always @(posedge clk) begin
@@ -87,7 +87,8 @@ module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
                 end
         end
 
-        assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
+        //assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
+        assign data_out = {memory[address+3], memory[address+2], memory[address+1], memory[address]};
 endmodule
 
 module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (

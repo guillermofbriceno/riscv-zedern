@@ -35,7 +35,6 @@ module cpu_tb();
 
         DataMemory DATAMEM(
                 .clk(clk),
-                //.address(address_data),
                 .address(address_data),
                 .data_in(data_out),
                 .width(width),
@@ -49,7 +48,7 @@ module cpu_tb();
                 $dumpvars(0, BootROM);
                 $dumpvars(0, DATAMEM);
                 #1;
-                for (i=0; i < 10; i=i+1) begin
+                for (i=0; i < 1000; i=i+1) begin
                         clk = 1;
                         #1;
                         clk = 0;

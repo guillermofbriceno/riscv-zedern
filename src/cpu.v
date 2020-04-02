@@ -19,7 +19,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         wire            [09:0] alu_func_s;
         wire            [02:0] alu_branch;
 
-        reg             [31:0] pc               = 32'b0;
+        reg             [31:0] pc               = 32'h200;
         wire            [31:0] pc_p4;
         wire            [31:0] pc_p_brch;
         wire            [31:0] pc_p_jmp;
@@ -34,7 +34,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         wire            [31:0] imm_u;
         wire            [31:0] imm_i;
         wire            [31:0] imm_s;
-        wire            [12:0] imm_b;
+        wire            [31:0] imm_b;
         wire            [31:0] imm_j;
 
         reg             [31:0] adjusted_data_in;
@@ -52,6 +52,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
 
         assign pc_p4               = pc + 4;
         assign pc_p_brch           = pc + imm_b;
+        //assign pc_p_brch           = pc + {{19{imm_b[12]}}, imm_b};
         assign pc_p_jmp            = pc + imm_j;
         assign pc_rs1_p_i          = pc + rs1_out;
         assign address_instruction = pc;
@@ -93,14 +94,9 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         assign alu_func_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
         assign funct3     = instruction[14:12];
         assign width      = funct3[1:0];
-        assign address_data = alu_out;
+        assign address_data = {20'b0, alu_out[31:12]};
         assign data_out   = rs2_out;
         assign write_mem  = control[`MEMWRITE_SIG];
-
-        //assign load_b     = {24{deata_in[7]}, data_in[7:0]};
-        //assign load_h     = {16{deata_in[15]}, data_in[15:0]};
-        //assign load_bu    = {24'b0, data_in[7:0]};
-        //assign load_hu    = {16'b0, data_in[15:0]};           
 
         assign instruction_type[`LUI_IDX  ] = ((instruction & `UJ_MASK)   == `LUI_OP  ) | 10'b0;
         assign instruction_type[`AUIPC_IDX] = ((instruction & `UJ_MASK)   == `AUIPC_OP) | 10'b0;
@@ -125,8 +121,8 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
                                             | ((instruction & `ISB_MASK)  == `SLTIU_OP)
                                             | ((instruction & `ISB_MASK)  == `XORI_OP )
                                             | ((instruction & `ISB_MASK)  == `ORI_OP  )
-                                            | ((instruction & `ISB_MASK)  == `ANDI_OP ) | 10'b0;
-        assign instruction_type[`SHFI_IDX ] = ((instruction & `ISB_MASK)  == `SLLI_OP )
+                                            | ((instruction & `ISB_MASK)  == `ANDI_OP )
+                                            | ((instruction & `ISB_MASK)  == `SLLI_OP )
                                             | ((instruction & `ISB_MASK)  == `SRLI_OP )
                                             | ((instruction & `ISB_MASK)  == `SRAI_OP ) | 10'b0;
         assign instruction_type[`ALUR_IDX ] = ((instruction & `R_MASK)    == `ADD_OP  )
@@ -139,6 +135,8 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
                                             | ((instruction & `R_MASK)    == `SRA_OP  )
                                             | ((instruction & `R_MASK)    == `OR_OP   )
                                             | ((instruction & `R_MASK)    == `AND_OP  ) | 10'b0;
+        
+        assign instruction_type[`SHFI_IDX] = 1'b0;
 
         always @ (instruction_type) begin
                 case(instruction_type)
@@ -158,17 +156,17 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
 
         always @(imm_s, imm_i, rs2_out, pc, control) begin
                 case(control[`ALU_SRC2_MUX])
-                        `RS2_SEL:   alu_in2 <= rs2_out;
-                        `S_IMM_SEL: alu_in2 <= imm_s;
-                        `I_IMM_SEL: alu_in2 <= imm_i;
-                        `PC_SEL:    alu_in2 <= pc;
+                        `RS2_SEL:   alu_in2 = rs2_out;
+                        `S_IMM_SEL: alu_in2 = imm_s;
+                        `I_IMM_SEL: alu_in2 = imm_i;
+                        `PC_SEL:    alu_in2 = pc;
                 endcase
         end
 
         always @(imm_u, rs1_out, control) begin
                 case(control[`ALU_SRC1_MUX]) 
-                        `U_IMM_SEL: alu_in1 <= imm_u;
-                        `RS1_SEL:   alu_in1 <= rs1_out;
+                        `U_IMM_SEL: alu_in1 = imm_u;
+                        `RS1_SEL:   alu_in1 = rs1_out;
                 endcase
         end
 
@@ -180,7 +178,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
                 .alu_branch(alu_branch)
         );
 
-        always @(funct3) begin
+        always @(funct3, data_in) begin
                 case(funct3)
                         `LB:     adjusted_data_in = {{24{data_in[7]}}, data_in[7:0]};
                         `LH:     adjusted_data_in = {{16{data_in[15]}}, data_in[15:0]};
@@ -190,11 +188,11 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
                 endcase
         end
 
-        always @(data_in, pc_p4, alu_out, control) begin
+        always @(adjusted_data_in, pc_p4, alu_out, control) begin
                 case(control[`WRB_REGF_MUX])
-                        `ALUOUT_SEL: rd_data <= alu_out;
-                        `PC_P_4_SEL: rd_data <= pc_p4;
-                        `DTAMEM_SEL: rd_data <= adjusted_data_in;
+                        `ALUOUT_SEL: rd_data = alu_out;
+                        `PC_P_4_SEL: rd_data = pc_p4;
+                        `DTAMEM_SEL: rd_data = adjusted_data_in;
                 endcase
         end
 
