@@ -94,7 +94,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         assign alu_func_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
         assign funct3     = instruction[14:12];
         assign width      = funct3[1:0];
-        assign address_data = {20'b0, alu_out[31:12]};
+        assign address_data = {22'b0, alu_out[9:0]};
         assign data_out   = rs2_out;
         assign write_mem  = control[`MEMWRITE_SIG];
 

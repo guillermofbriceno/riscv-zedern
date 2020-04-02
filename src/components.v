@@ -91,6 +91,26 @@ module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         assign data_out = {memory[address+3], memory[address+2], memory[address+1], memory[address]};
 endmodule
 
+module InstructionMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
+        input clk,
+        input [bits_addr - 1:0] address_p1,
+        input [bits_addr - 1:0] address_p2,
+        output wire [bits_data - 1:0] data_out_p1,
+        output wire [bits_data - 1:0] data_out_p2
+        );
+
+        //reg [bits_data - 1:0] memory [0:entries - 1];
+        reg [7:0] memory [0:entries - 1];
+
+        initial begin
+                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/c_image.hex", memory);
+        end
+
+        //assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
+        assign data_out_p1 = {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
+        assign data_out_p2 = {memory[address_p2+3], memory[address_p2+2], memory[address_p2+1], memory[address_p2]};
+endmodule
+
 module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         input clk,
         input [bits_addr - 1:0] address,
@@ -104,10 +124,18 @@ module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
 
         initial begin
                 $readmemh("/home/guillermo/programming/riscv-zedern/scripts/empty.hex", memory);
-                $dumpvars(0, memory[0]);
-                $dumpvars(0, memory[1]);
-                $dumpvars(0, memory[2]);
-                $dumpvars(0, memory[3]);
+                $dumpvars(0, memory[80]);
+                $dumpvars(0, memory[81]);
+                $dumpvars(0, memory[82]);
+                $dumpvars(0, memory[83]);
+                $dumpvars(0, memory[84]);
+                $dumpvars(0, memory[85]);
+                $dumpvars(0, memory[86]);
+                $dumpvars(0, memory[87]);
+                $dumpvars(0, memory[88]);
+                $dumpvars(0, memory[89]);
+                $dumpvars(0, memory[90]);
+                $dumpvars(0, memory[91]);
         end
 
         always @(posedge clk) begin
