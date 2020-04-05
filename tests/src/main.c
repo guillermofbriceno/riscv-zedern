@@ -1,15 +1,42 @@
 #include "hw_macros.h"
 
-const char x[] = {"Hello World!"};
-//volatile unsigned int test = 8;
-//volatile unsigned int test2 = 87;
+#define LIMIT 100
+//const char x[] = {"Hello World!"};
 
-int main() {
-        //test = test + 1;
-        for (int i = 0; i < 12; i++) {
-                MEM(0x450 + i) = x[i] + 1;
+int main()
+{
+        int i,j;
+
+        int primes[LIMIT+1];
+
+        //populating array with naturals LIMITs
+        for(i = 2; i<=LIMIT; i++)
+                primes[i] = i;
+
+        i = 2;
+        while ((i*i) <= LIMIT) {
+                if (primes[i] != 0) {
+                        for(j=2; j<LIMIT; j++) {
+                                if (primes[i]*j > LIMIT)
+                                        break;
+                                else
+                                primes[primes[i]*j]=0;
+                        }
+                }
+                i++;
         }
-        //MEM(0xf3) = x[3];
-        
-        return 0;
+
+        int count = 0;
+        for(i = 2; i <= LIMIT; i++) {
+                if (primes[i]!=0) {
+                        //MEM(0x450 + (count * 4)) = primes[i];
+                        MEM(0x450) = primes[i];
+                        for (int j = 0; j < 5000; j++){asm("");}
+                        count++;
+                
+                }
+        }
+
+    return 0;
 }
+

@@ -9,11 +9,15 @@ OBJS = $(addprefix $(OBJ),$(notdir $(SRCS:.c=.o)))
 
 INC=-Iinc
 
+RISCVPRE=/home/guillermo/.local/bin/riscv
+
 LDSCRIPT=link.ld
-CC=riscv32-unknown-elf-gcc
+#CC=riscv32-unknown-elf-gcc
+CC=riscv32-unknown-elf-gcc-9.2.0 -nostdlib -march=rv32im
 LDFLAGS=-T$(LDSCRIPT) -e ResetHandler
 LD=riscv32-unknown-elf-ld
-CFLAGS=-O2 -nostdlib -ffunction-sections -c -fno-unroll-loops
+CFLAGS=-O2 -ffunction-sections -c -fno-unroll-loops
+#CFLAGS=-O2 -nostdlib -ffunction-sections -c -fno-unroll-loops
 OBJCOPY=riscv32-unknown-elf-objcopy
 OBJDUMP=riscv32-unknown-elf-objdump
 
