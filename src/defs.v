@@ -46,6 +46,7 @@
 `define SRA_OP          32'h40005033
 `define OR_OP           32'h00006033
 `define AND_OP          32'h00007033
+`define MUL_OP          32'h02000033
 
 //`define FENCE_OP        
 //`define FENCEI_OP        
@@ -148,3 +149,8 @@
 `define LBU             3'b100
 `define LHU             3'b101
 
+
+//Store Types
+`define WR_WORD         2'b10
+`define WR_HALFWORD     2'b01
+`define WR_BYTE         2'b00

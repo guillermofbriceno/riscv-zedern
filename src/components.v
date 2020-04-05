@@ -6,15 +6,12 @@ module RegisterFile(rs1_addr, rs2_addr, rs1_out, rs2_out, rd_addr, rd_data, writ
         input [31:0]rd_data;
         input write;
         input clk;
-        output [31:0] rs1_out, rs2_out;
-
-        wire [31:0] reg5test;
+        output wire [31:0] rs1_out, rs2_out;
 
         reg [31:0] registers [31:0];
 
         assign rs1_out = registers[rs1_addr];
         assign rs2_out = registers[rs2_addr];
-        assign reg5test = registers[5];
 
         integer i;
         initial begin
@@ -30,6 +27,11 @@ module RegisterFile(rs1_addr, rs2_addr, rs1_out, rs2_out, rd_addr, rd_data, writ
                         registers[rd_addr] <= rd_data;
                 end
         end
+
+        //always @ (posedge clk) begin
+        //        rs1_out <= registers[rs1_addr];
+        //        rs2_out <= registers[rs2_addr];
+        //end
 endmodule
 
 module Alu(in1, in2, out, func, alu_branch);
@@ -51,27 +53,26 @@ module Alu(in1, in2, out, func, alu_branch);
                         10'b0100000_101: out = in1 >>> in2[4:0];
                         10'b0000000_110: out = in1 |   in2;
                         10'b0000000_111: out = in1 &   in2;
+                        10'b0000001_000: out = in1 *   in2;
+                        default:         out = 32'b0;
                 endcase
 
-                alu_branch[`EQ_IDX]  = in1 == in2;
-                alu_branch[`LTS_IDX] = (in1[31] != in2[31]) ? in2[31] : sub[31];
-                alu_branch[`LTU_IDX] = in1 <  in2;
+                alu_branch[`EQ_IDX]  <= in1 == in2;
+                alu_branch[`LTS_IDX] <= (in1[31] != in2[31]) ? in2[31] : sub[31];
+                alu_branch[`LTU_IDX] <= in1 <  in2;
         end
 
 
 endmodule
 
-// System Components
-
-module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
+module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=1024) (
         input clk,
-        input [bits_addr - 1:0] address,
-        input [bits_data - 1:0] data_in,
-        input write,
-        output wire [bits_data - 1:0] data_out
+        input [bits_addr - 1:0] address_p1,
+        input [bits_addr - 1:0] address_p2,
+        output reg [bits_data - 1:0] data_out_p1,
+        output reg [bits_data - 1:0] data_out_p2
         );
 
-        //reg [bits_data - 1:0] memory [0:entries - 1];
         reg [7:0] memory [0:entries - 1];
 
         initial begin
@@ -79,86 +80,69 @@ module MemoryUnit #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         end
 
         always @(posedge clk) begin
-                if (write) begin
-                        memory[address]   <= data_in[31:24];
-                        memory[address+1] <= data_in[23:16];
-                        memory[address+2] <= data_in[15:08];
-                        memory[address+3] <= data_in[07:00];
-                end
+                data_out_p1 <= {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
+                data_out_p2 <= {memory[address_p2+3], memory[address_p2+2], memory[address_p2+1], memory[address_p2]};
         end
-
-        //assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
-        assign data_out = {memory[address+3], memory[address+2], memory[address+1], memory[address]};
-endmodule
-
-module InstructionMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
-        input clk,
-        input [bits_addr - 1:0] address_p1,
-        input [bits_addr - 1:0] address_p2,
-        output wire [bits_data - 1:0] data_out_p1,
-        output wire [bits_data - 1:0] data_out_p2
-        );
-
-        //reg [bits_data - 1:0] memory [0:entries - 1];
-        reg [7:0] memory [0:entries - 1];
-
-        initial begin
-                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/c_image.hex", memory);
-        end
-
-        //assign data_out = {memory[address], memory[address+1], memory[address+2], memory[address+3]};
-        assign data_out_p1 = {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
-        assign data_out_p2 = {memory[address_p2+3], memory[address_p2+2], memory[address_p2+1], memory[address_p2]};
 endmodule
 
 module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         input clk,
         input [bits_addr - 1:0] address,
         input [bits_data - 1:0] data_in,
-        input [1:0] width,
+        input [3:0] width,
         input write,
-        output wire [bits_data - 1:0] data_out
+        output reg [bits_data - 1:0] data_out
         );
 
-        reg [7:0] memory [0:entries - 1];
+        reg [31:0] memory [0:entries - 1];
+        integer i;
 
         initial begin
                 $readmemh("/home/guillermo/programming/riscv-zedern/scripts/empty.hex", memory);
-                $dumpvars(0, memory[80]);
-                $dumpvars(0, memory[81]);
-                $dumpvars(0, memory[82]);
-                $dumpvars(0, memory[83]);
-                $dumpvars(0, memory[84]);
-                $dumpvars(0, memory[85]);
-                $dumpvars(0, memory[86]);
-                $dumpvars(0, memory[87]);
-                $dumpvars(0, memory[88]);
-                $dumpvars(0, memory[89]);
-                $dumpvars(0, memory[90]);
-                $dumpvars(0, memory[91]);
+                for(i=0; i < 1024; i=i+1) begin
+                        $dumpvars(0, memory[i]);
+                end
         end
 
         always @(posedge clk) begin
                 if (write) begin
-                        case (width)
-                                2'b00: begin
-                                        memory[address]   <= data_in[07:00];
-                                end
-                                2'b01: begin
-                                        memory[address+1] <= data_in[15:08];
-                                        memory[address  ] <= data_in[07:00];
-                                end
-                                2'b10: begin
-                                        memory[address+3] <= data_in[31:24];
-                                        memory[address+2] <= data_in[23:16];
-                                        memory[address+1] <= data_in[15:08];
-                                        memory[address  ] <= data_in[07:00];
-                                end
-                        endcase
+                        if (width[3]) begin
+                                memory[address[31:2]][7:0] <= data_in[31:24];
+                        end
+                        if (width[2]) begin
+                                memory[address[31:2]][15:8] <= data_in[23:16];
+                        end
+                        if (width[1]) begin
+                                memory[address[31:2]][23:16] <= data_in[15:8];
+                        end
+                        if (width[0]) begin
+                                memory[address[31:2]][31:24] <= data_in[7:0];
+                        end
+
                 end
         end
 
-        assign data_out = {memory[address+3], memory[address+2], memory[address+1], memory[address]};
+        always @(negedge clk) begin
+                data_out <= {memory[address[31:2]][7:0], memory[address[31:2]][15:8], memory[address[31:2]][23:16], memory[address[31:2]][31:24]};
+        end
+endmodule
+
+module GPOPeriph (address, data, out, clk, write);
+        input [31:0] address;
+        input [ 7:0] data;
+        input        clk;
+        input        write;
+        output [7:0] out;
+
+        reg [7:0] mem = 8'b0;
+        
+        always @ (posedge clk) begin
+                if (address == 32'h50 & write) begin
+                        mem <= data;
+                end
+        end
+        assign out = mem;
+
 endmodule
 
 module clock_gen #(parameter clock_tap = 21)(in_clk, out_clk);

@@ -21,5 +21,8 @@ check:
 burn:
 	iceprog $(BUILD)/$(PROJ).bin  
 
+gui:
+	nextpnr-ice40 --hx8k --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc --pcf-allow-unconstrained --gui
+
 clean:
 	rm build/*
