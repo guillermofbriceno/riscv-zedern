@@ -4,8 +4,8 @@
 module Cpu(clk, instruction, data_in, data_out, width, address_instruction, address_data, write_mem);
         input                  clk; 
         input           [31:0] instruction, data_in;
-        output wire     [31:0] address_instruction;
-        output          [31:0] address_data;
+        output wire     [ 9:0] address_instruction;
+        output          [ 9:0] address_data;
         output reg      [03:0] width;
         output reg      [31:0] data_out;
         output                 write_mem;
@@ -21,11 +21,12 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         wire            [09:0] alu_func_s;
         wire            [02:0] alu_branch;
 
-        reg             [31:0] pc               = 32'h1fc;
+        reg             [31:0] pc               = 32'h334;
         //reg             [31:0] pc;
         wire            [31:0] pc_p4;
         wire            [31:0] pc_p_brch;
         wire            [31:0] pc_p_jmp;
+        wire            [31:0] pc_p_jalr;
         wire            [31:0] pc_rs1_p_i;
         reg                    cond_branch;
         wire                   taken;
@@ -47,7 +48,6 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
 
         reg             [31:0] alu_in1;
         reg             [31:0] alu_in2;
-        reg             [01:0] mux_wb;
         wire            [03:0] cond_branch_ctrl;
 
         reg             [1:0]  startup = 2'b00;
@@ -66,8 +66,9 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         assign pc_p_brch           = pc + imm_b;
         //assign pc_p_brch           = pc + {{19{imm_b[12]}}, imm_b};
         assign pc_p_jmp            = pc + imm_j;
+        assign pc_p_jalr           = {{20{imm_i[12]}}, imm_i} + rs1_out;
         assign pc_rs1_p_i          = pc + rs1_out;
-        assign address_instruction = pc_next;
+        assign address_instruction = pc_next[9:0];
         assign taken               = control[`COND_BR_IDX] & cond_branch;
 
         assign cond_branch_ctrl = {control[`BRANCH_ENC], taken};
@@ -77,7 +78,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
                         `NO_BRANCH_SEL:  pc_next <= pc_p4;
                         `COND_BR_SEL:    pc_next <= pc_p_brch;
                         `JAL_SEL:        pc_next <= pc_p_jmp;
-                        `JALR_SEL:       pc_next <= pc_p4;
+                        `JALR_SEL:       pc_next <= pc_p_jalr;
                         default:         pc_next <= pc_p4;
                 endcase
         end
@@ -92,8 +93,8 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         //        endcase
         //end
 
-        always @ (alu_branch, cond_branch, funct3) begin
-        //always @ (*) begin
+        //always @ (alu_branch, cond_branch, funct3) begin
+        always @ (*) begin
                 case(funct3)
                         `BEQ:    cond_branch <=  alu_branch[`EQ_IDX] ;
                         `BNE:    cond_branch <= ~alu_branch[`EQ_IDX] ;
@@ -117,7 +118,7 @@ module Cpu(clk, instruction, data_in, data_out, width, address_instruction, addr
         assign alu_func   = control[`ALU_FUNC_MUX]  ? alu_func_s : 10'b0;
         assign alu_func_s = control[`ALU_FWIDE_MUX] ? {instruction[31:25], instruction[14:12]} : {7'b0, instruction[14:12]};
         assign funct3     = instruction[14:12];
-        assign address_data = {22'b0, alu_out[10:0]};
+        assign address_data = alu_out[9:0];
         assign write_mem  = control[`MEMWRITE_SIG];
 
 

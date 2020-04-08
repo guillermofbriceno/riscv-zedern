@@ -1,10 +1,21 @@
 #include "hw_macros.h"
 
-#define LIMIT 100
-//const char x[] = {"Hello World!"};
+#define LIMIT 20
+//#define LIMIT 11
 
-int main()
-{
+unsigned int __mulsi3 (unsigned int a, unsigned int b) {
+        unsigned int r = 0;
+
+        while (a) {
+        if (a & 1)
+                r += b;
+                a >>= 1;
+                b <<= 1;
+        }
+        return r;
+}
+
+int main() {
         int i,j;
 
         int primes[LIMIT+1];
@@ -31,7 +42,8 @@ int main()
                 if (primes[i]!=0) {
                         //MEM(0x450 + (count * 4)) = primes[i];
                         MEM(0x450) = primes[i];
-                        for (int j = 0; j < 5000; j++){asm("");}
+                        for (j = 0; j < 100000; j++){asm("");}
+                        //for (j = 0; j < 120; j++){asm("");}
                         count++;
                 
                 }

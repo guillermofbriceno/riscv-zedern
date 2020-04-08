@@ -53,7 +53,7 @@ module Alu(in1, in2, out, func, alu_branch);
                         10'b0100000_101: out = in1 >>> in2[4:0];
                         10'b0000000_110: out = in1 |   in2;
                         10'b0000000_111: out = in1 &   in2;
-                        10'b0000001_000: out = in1 *   in2;
+                        //10'b0000001_000: out = in1 *   in2;
                         default:         out = 32'b0;
                 endcase
 
@@ -67,13 +67,14 @@ endmodule
 
 module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=1024) (
         input clk,
-        input [bits_addr - 1:0] address_p1,
-        input [bits_addr - 1:0] address_p2,
-        output reg [bits_data - 1:0] data_out_p1,
-        output reg [bits_data - 1:0] data_out_p2
+        input [9:0] address_p1,
+        input [9:0] address_p2,
+        output reg [31:0] data_out_p1,
+        output reg [31:0] data_out_p2
         );
 
-        reg [7:0] memory [0:entries - 1];
+        reg [7:0] memory [1023:0];
+        //reg [7:0] memory [0:entries - 1];
 
         initial begin
                 $readmemh("/home/guillermo/programming/riscv-zedern/scripts/c_image.hex", memory);
@@ -85,16 +86,17 @@ module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=102
         end
 endmodule
 
-module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
+module DataMemory #(parameter bits_data = 32, bits_addr = 10, entries=1024) (
         input clk,
-        input [bits_addr - 1:0] address,
-        input [bits_data - 1:0] data_in,
+        input [9:0] address,
+        input [31:0] data_in,
         input [3:0] width,
         input write,
-        output reg [bits_data - 1:0] data_out
+        output reg [31:0] data_out
         );
 
-        reg [31:0] memory [0:entries - 1];
+        reg [31:0] memory [1023:0];
+        //reg [31:0] memory [:entries - 1];
         integer i;
 
         initial begin
@@ -107,28 +109,28 @@ module DataMemory #(parameter bits_data = 32, bits_addr = 32, entries=1024) (
         always @(posedge clk) begin
                 if (write) begin
                         if (width[3]) begin
-                                memory[address[31:2]][7:0] <= data_in[31:24];
+                                memory[address[9:2]][7:0] <= data_in[31:24];
                         end
                         if (width[2]) begin
-                                memory[address[31:2]][15:8] <= data_in[23:16];
+                                memory[address[9:2]][15:8] <= data_in[23:16];
                         end
                         if (width[1]) begin
-                                memory[address[31:2]][23:16] <= data_in[15:8];
+                                memory[address[9:2]][23:16] <= data_in[15:8];
                         end
                         if (width[0]) begin
-                                memory[address[31:2]][31:24] <= data_in[7:0];
+                                memory[address[9:2]][31:24] <= data_in[7:0];
                         end
 
                 end
         end
 
         always @(negedge clk) begin
-                data_out <= {memory[address[31:2]][7:0], memory[address[31:2]][15:8], memory[address[31:2]][23:16], memory[address[31:2]][31:24]};
+                data_out <= {memory[address[9:2]][7:0], memory[address[9:2]][15:8], memory[address[9:2]][23:16], memory[address[9:2]][31:24]};
         end
 endmodule
 
 module GPOPeriph (address, data, out, clk, write);
-        input [31:0] address;
+        input [9:0] address;
         input [ 7:0] data;
         input        clk;
         input        write;
@@ -137,7 +139,7 @@ module GPOPeriph (address, data, out, clk, write);
         reg [7:0] mem = 8'b0;
         
         always @ (posedge clk) begin
-                if (address == 32'h50 & write) begin
+                if (address == 10'h50 & write) begin
                         mem <= data;
                 end
         end

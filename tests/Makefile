@@ -13,10 +13,10 @@ RISCVPRE=/home/guillermo/.local/bin/riscv
 
 LDSCRIPT=link.ld
 #CC=riscv32-unknown-elf-gcc
-CC=riscv32-unknown-elf-gcc-9.2.0 -nostdlib -march=rv32im
-LDFLAGS=-T$(LDSCRIPT) -e ResetHandler
-LD=riscv32-unknown-elf-ld
-CFLAGS=-O2 -ffunction-sections -c -fno-unroll-loops
+CC=riscv32-unknown-elf-gcc -c -march=rv32i -nostdlib -mabi=ilp32 -lgcc
+LDFLAGS=-march=rv32i -T$(LDSCRIPT) -e ResetHandler -ffreestanding -nostdlib
+LD=riscv32-unknown-elf-gcc -lgcc -L /home/guillermo/.local/bin/riscv/lib/gcc/riscv32-unknown-elf/9.2.0/rv32i/ilp32
+CFLAGS=-O2
 #CFLAGS=-O2 -nostdlib -ffunction-sections -c -fno-unroll-loops
 OBJCOPY=riscv32-unknown-elf-objcopy
 OBJDUMP=riscv32-unknown-elf-objdump

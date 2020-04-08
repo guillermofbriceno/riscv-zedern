@@ -10,8 +10,8 @@ TEST=src/cpu_tb.v
 
 all:
 	mkdir -p $(BUILD)
-	yosys -p 'synth_ice40 -top $(TOP) -json $(BUILD)/$(PROJ).json' $(FILES)
-	nextpnr-ice40 --hx8k --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc --pcf-allow-unconstrained
+	yosys -p 'synth_ice40 -top $(TOP) -json $(BUILD)/$(PROJ).json -noflatten' $(FILES)
+	nextpnr-ice40 --hx8k --package ct256 --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc
 	icepack $(BUILD)/$(PROJ).asc $(BUILD)/$(PROJ).bin
 check:
 	mkdir -p $(BUILD)
@@ -23,6 +23,12 @@ burn:
 
 gui:
 	nextpnr-ice40 --hx8k --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc --pcf-allow-unconstrained --gui
+
+yo:
+	yosys -p 'synth_ice40 -top $(TOP) -json $(BUILD)/$(PROJ).json -noflatten' $(FILES)
+
+pnr:
+	nextpnr-ice40 --hx8k --package ct256 --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc
 
 clean:
 	rm build/*
