@@ -7,8 +7,8 @@ module Decode(
         //input   wire [31:0]  pc;
         output  wire [31:0]  rs1_data,
         output  wire [31:0]  rs2_data,
-        output  reg  [ 4:0]  rs1_addr,
-        output  reg  [ 4:0]  rs2_addr,
+        output  reg  [ 4:0]  rs1_addr_out,
+        output  reg  [ 4:0]  rs2_addr_out,
         output  reg  [ 4:0]  rd_addr_out,
         output  reg  [19:0]  imm_u_nosft,
         output  reg  [11:0]  imm_i_noext,
@@ -26,11 +26,16 @@ module Decode(
                 wire [09:0] alu_func_s;
                 reg  [11:0] control;
                 wire [09:0] instruction_type;
-                wire [2:0]  funct3;
+                wire [ 2:0] funct3;
+                wire [ 4:0] rs1_addr;
+                wire [ 4:0] rs2_addr;
+
+        assign rs1_addr     = instruction[19:15];
+        assign rs2_addr     = instruction[24:20];
 
         always @ (posedge clk) begin
-                rs1_addr     <= instruction[19:15];
-                rs2_addr     <= instruction[24:20];
+                rs1_addr_out <= rs1_addr;
+                rs2_addr_out <= rs2_addr;
                 rd_addr_out  <= instruction[11:07];
                 imm_u_nosft  <= instruction[31:12];
                 //imm_u        <= instruction[31:12] << 12;

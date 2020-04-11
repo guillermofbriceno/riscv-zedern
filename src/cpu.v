@@ -3,6 +3,7 @@
 `include "cpu_execute.v"
 `include "cpu_memory.v"
 `include "cpu_writeback.v"
+`include "hazard.v"
 
 module RV32I_CPU(
         input                clk,
@@ -30,8 +31,8 @@ module RV32I_CPU(
                 .instruction(instruction),
                 .rs1_data(rs1_data_execute),
                 .rs2_data(rs2_data_execute),
-                .rs1_addr(rs1_addr_execute),
-                .rs2_addr(rs2_addr_execute),
+                .rs1_addr_out(rs1_addr_execute),
+                .rs2_addr_out(rs2_addr_execute),
                 .rd_addr_out(rd_addr_out_execute),
                 .imm_u_nosft(imm_u_nosft),
                 .imm_i_noext(imm_i_noext),
@@ -87,8 +88,12 @@ module RV32I_CPU(
                 .reg_write_out(reg_write_memory),
                 .mem_write_out(write_mem),
                 .alu_out_clocked(alu_out),
-                .rs2_out(data_out)
+                .rs2_out(data_out),
+                .wb_mux(wb_mux_execute),
+                .wb_mux_out(wb_mux_memory)
         );
+                assign forward_mem = alu_out;
+                assign forward_wb  = rd_data;
                 wire [31:0]  alu_out;
                 assign       data_address = alu_out[9:0];
                 wire [04:0]  rd_addr_memory;
@@ -119,6 +124,16 @@ module RV32I_CPU(
                 .rd_data(rd_data)
         );
 
-                //wire [31:0] rd_data;
+        HazardUnit hazard(
+                .rs1_addr_execute(rs1_addr_execute),
+                .rs2_addr_execute(rs2_addr_execute),
+                .rd_addr_mem(rd_addr_memory),
+                .rd_write_mem(reg_write_memory),
+                .rd_addr_wb(rd_addr),
+                .rd_write_wb(reg_write),
+                .forward_control_src1(forward_control_src1),
+                .forward_control_src2(forward_control_src2)
+        );
+
 
 endmodule

@@ -18,6 +18,7 @@ module Execute(
         input   wire [ 1:0]  forward_control_src1,
         input   wire [ 1:0]  forward_control_src2,
         input   wire [ 9:0]  alu_func,
+        input   wire [ 1:0]  wb_mux,
 
         input   wire [0:0]   alu_src1_mux,
         input   wire [1:0]   alu_src2_mux,
@@ -26,7 +27,8 @@ module Execute(
         output  reg  [ 0:0]  reg_write_out,
         output  reg  [31:0]  alu_out_clocked,
         output  reg  [ 0:0]  mem_write_out,
-        output  reg  [31:0]  rs2_out
+        output  reg  [31:0]  rs2_out,
+        output  reg  [ 1:0]  wb_mux_out
 );
                 reg  [31:0]  rs1;
                 reg  [31:0]  rs2;
@@ -41,6 +43,7 @@ module Execute(
                 rs2_out         <= rs2_data;
                 reg_write_out   <= reg_write;
                 mem_write_out   <= mem_write;
+                wb_mux_out      <= wb_mux;
         end
 
         always @ (*) begin
@@ -64,7 +67,7 @@ module Execute(
                 case(alu_src2_mux)
                         `RS2_SEL:   alu_in2 <= rs2;
                         `S_IMM_SEL: alu_in2 <= {{20{imm_s_noext[11]}}, imm_s_noext};
-                        `I_IMM_SEL: alu_in2 <= {{20{imm_i_noext}}, imm_i_noext};
+                        `I_IMM_SEL: alu_in2 <= {{20{imm_i_noext[11]}}, imm_i_noext};
                         //`PC_SEL:    alu_in2 <= pc;
                 endcase
 
