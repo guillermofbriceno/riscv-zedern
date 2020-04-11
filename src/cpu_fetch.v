@@ -4,7 +4,8 @@ module Fetch(
         output wire [9:0] instruction_address
         //output reg [31:0] pc;
 );
-        reg [31:0] pc = 32'h114;
+        //reg [31:0] pc = 32'h114;
+        reg [31:0] pc = 32'h000;
         wire [31:0] pc_next;
 
         assign pc_next             = pc + 4;

@@ -3,12 +3,15 @@ module RegisterFile(rs1_addr, rs2_addr, rs1_out, rs2_out, rd_addr, rd_data, writ
         input [31:0]rd_data;
         input write;
         input clk;
-        output reg [31:0] rs1_out, rs2_out;
+        output wire [31:0] rs1_out, rs2_out;
 
         reg [31:0] registers [31:0];
 
-        //assign rs1_out = registers[rs1_addr];
-        //assign rs2_out = registers[rs2_addr];
+        reg [04:0] rs1_address_internal;
+        reg [04:0] rs2_address_internal;
+
+        assign rs1_out = registers[rs1_address_internal];
+        assign rs2_out = registers[rs2_address_internal];
 
         integer i;
         initial begin
@@ -26,8 +29,11 @@ module RegisterFile(rs1_addr, rs2_addr, rs1_out, rs2_out, rd_addr, rd_data, writ
         end
 
         always @ (posedge clk) begin
-                rs1_out <= registers[rs1_addr];
-                rs2_out <= registers[rs2_addr];
+                //rs1_out <= registers[rs1_addr];
+                //rs2_out <= registers[rs2_addr];
+                
+                rs1_address_internal <= rs1_addr;
+                rs2_address_internal <= rs2_addr;
         end
 endmodule
 
