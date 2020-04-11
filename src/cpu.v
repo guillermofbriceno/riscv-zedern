@@ -18,8 +18,8 @@ module RV32I_CPU(
 
                 wire [31:0]  forward_mem;
                 wire [31:0]  forward_wb;
-                reg  [01:0]  forward_control_src1 = 2'b0;
-                reg  [01:0]  forward_control_src2 = 2'b0;
+                wire [01:0]  forward_control_src1;
+                wire [01:0]  forward_control_src2;
 
         Fetch fetch_stage(
                 .clk(clk),
