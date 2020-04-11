@@ -6,7 +6,7 @@ MEMORY {
      * RAM (rwx) : ORIGIN = 0x2000000, LENGTH = 0x1000
     */
 
-     FLASH (rx) : ORIGIN = 0x1fc, LENGTH = 0x400
+     FLASH (rx) : ORIGIN = 0x000, LENGTH = 0x400
      RAM (rwx) : ORIGIN = 0x404, LENGTH = 0x400
 
 }
@@ -17,7 +17,7 @@ SECTIONS {
         .text : {
                 _text = .;
                 KEEP(*(.vector_table))
-                *(.text.ResetHandler)
+                /**(.text.ResetHandler)*/
                 *(.text*)
                 *(.rodata*)
                 _etext = .;
