@@ -2,6 +2,8 @@
 //   R:    1111111_0000000000_111_00000_1111111
 //   ISBU: 00000000000000000_111_00000_1111111
 
+`default_nettype none
+
 `define UJ_MASK         32'h0000007f
 `define R_MASK          32'hfe00707f
 `define ISB_MASK        32'h0000707f
@@ -154,3 +156,8 @@
 `define WR_WORD         2'b10
 `define WR_HALFWORD     2'b01
 `define WR_BYTE         2'b00
+
+//Forward Types
+`define RS_DATA         2'b00
+`define FWD_MEM         2'b01
+`define FWD_WB          2'b10
