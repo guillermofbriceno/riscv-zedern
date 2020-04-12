@@ -25,6 +25,7 @@ module Writeback(
                         `ALUOUT_SEL: rd_data <= alu_out;
                         `PC_P_4_SEL: rd_data <= pc+4;
                         `DTAMEM_SEL: rd_data <= adjusted_data_in;
+                        default:     rd_data <= alu_out;
                 endcase
         end
 endmodule

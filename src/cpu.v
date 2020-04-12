@@ -20,6 +20,8 @@ module RV32I_CPU(
                 wire [31:0]  forward_wb;
                 wire [01:0]  forward_control_src1;
                 wire [01:0]  forward_control_src2;
+                reg  [03:0]  width_reg = 4'b1;
+                assign width = width_reg;
 
         Fetch fetch_stage(
                 .clk(clk),

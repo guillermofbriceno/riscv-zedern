@@ -21,7 +21,7 @@ module cpu_tb();
         RV32I_CPU CPU(
                 .clk(clk), 
                 .instruction(instruction),
-                .data_in(data_mem_data),
+                .data_in(data_in),
                 .data_out(data_out),
                 .width(width),
                 .write_mem(write),

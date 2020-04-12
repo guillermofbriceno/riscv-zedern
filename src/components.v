@@ -61,7 +61,7 @@ module DataMemory #(parameter bits_data = 32, bits_addr = 10, entries=1024) (
                 end
         end
 
-        always @(negedge clk) begin
+        always @(posedge clk) begin
                 data_out <= {memory[address[9:2]][7:0], memory[address[9:2]][15:8], memory[address[9:2]][23:16], memory[address[9:2]][31:24]};
         end
 endmodule

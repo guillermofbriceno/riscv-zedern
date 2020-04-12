@@ -51,12 +51,14 @@ module Execute(
                         `RS_DATA:   rs1     <= rs1_data;
                         `FWD_MEM:   rs1     <= forward_mem;
                         `FWD_WB:    rs1     <= forward_wb;
+                        default:    rs1     <= rs1_data;
                 endcase
 
                 case (forward_control_src2)
                         `RS_DATA:   rs2     <= rs2_data;
                         `FWD_MEM:   rs2     <= forward_mem;
                         `FWD_WB:    rs2     <= forward_wb;
+                        default:    rs2     <= rs2_data;
                 endcase
 
                 case(alu_src1_mux) 
@@ -69,9 +71,8 @@ module Execute(
                         `S_IMM_SEL: alu_in2 <= {{20{imm_s_noext[11]}}, imm_s_noext};
                         `I_IMM_SEL: alu_in2 <= {{20{imm_i_noext[11]}}, imm_i_noext};
                         //`PC_SEL:    alu_in2 <= pc;
+                        default:    alu_in2 <= rs2;
                 endcase
-
-                
         end
 
         Alu IntegerALU (
