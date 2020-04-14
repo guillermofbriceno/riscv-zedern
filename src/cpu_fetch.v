@@ -1,17 +1,30 @@
 
 module Fetch(
         input clk,
-        output wire [9:0] instruction_address
-        //output reg [31:0] pc;
-);
-        //reg [31:0] pc = 32'h114;
-        reg [31:0] pc = 32'h000;
-        wire [31:0] pc_next;
+        input stall,
+        output wire [9:0] instruction_address,
+        output reg [31:0] pc_out,
 
-        assign pc_next             = pc + 4;
+        input [31:0] target,
+        input [0:0]  taken
+);
+        reg [31:0] pc_next;
+        reg [31:0] pc = 32'b00;
+
         assign instruction_address = pc[9:0];
 
         always @ (posedge clk) begin
-                pc <= pc_next;
+                if (!stall) begin
+                        pc <= pc_next;
+                end
+                pc_out <= pc;
+        end
+
+        always @ (*) begin
+                if (taken) begin
+                        pc_next <= target;
+                end else begin
+                        pc_next <= pc + 4;
+                end
         end
 endmodule

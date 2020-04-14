@@ -3,6 +3,7 @@
 // System components
 module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=1024) (
         input clk,
+        input read_enable,
         input [9:0] address_p1,
         input [9:0] address_p2,
         output reg [31:0] data_out_p1,
@@ -18,7 +19,12 @@ module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=102
         end
 
         always @(posedge clk) begin
-                data_out_p1 <= {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
+                if (read_enable) begin
+                        data_out_p1 <= {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
+                end else begin
+                        data_out_p1 <= 32'b0;
+                end
+
                 data_out_p2 <= {memory[address_p2+3], memory[address_p2+2], memory[address_p2+1], memory[address_p2]};
         end
 endmodule

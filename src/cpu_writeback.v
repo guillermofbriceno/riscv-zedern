@@ -4,11 +4,11 @@ module Writeback(
         //input   wire [31:0]  pc,
         //input   wire [2:0]  funct3,
         input   wire [01:0]  wb_mux,
+        input   wire [02:0]  funct3,
 
         output  reg  [31:0]  rd_data
 );
 
-        reg [2:0] funct3 = 3'b0; //temp
         reg [31:0] pc = 32'b0; //temp
         reg [31:0] adjusted_data_in;
 

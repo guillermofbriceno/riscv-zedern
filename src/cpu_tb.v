@@ -15,7 +15,8 @@ module cpu_tb();
         wire [3:0 ] width;
         wire [31:0] inst_mem_data;
         wire [31:0] data_mem_data;
-        wire [7:0]  leds;
+        wire [ 7:0]  leds;
+        wire [ 0:0] read_inst_enable;
 
 
         RV32I_CPU CPU(
@@ -26,11 +27,13 @@ module cpu_tb();
                 .width(width),
                 .write_mem(write),
                 .instruction_address(instruction_address),
-                .data_address(data_address)
+                .data_address(data_address),
+                .read_inst_enable(read_inst_enable)
         );
 
         InstructionMemory BOOTROM(
                 .clk(clk),
+                .read_enable(read_inst_enable),
                 .address_p1(instruction_address),
                 .address_p2(data_address),
                 .data_out_p1(instruction),

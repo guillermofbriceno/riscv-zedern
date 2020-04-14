@@ -123,10 +123,14 @@
 `define FUNCT7_SEL      1
 
 `define BRANCH_ENC      10:8
-`define NO_BRANCH_SEL   4'b0000
-`define JAL_SEL         4'b0100
-`define JALR_SEL        4'b1000
-`define COND_BR_SEL     4'b0011
+//`define NO_BRANCH_SEL   4'b0000
+//`define JAL_SEL         4'b0100
+//`define JALR_SEL        4'b1000
+//`define COND_BR_SEL     4'b0011
+`define NO_BRANCH_SEL   3'b000
+`define JAL_SEL         3'b010
+`define JALR_SEL        3'b100
+`define COND_BR_SEL     3'b001
 `define COND_BR_IDX     8
 
 `define MEMWRITE_SIG    11:11
