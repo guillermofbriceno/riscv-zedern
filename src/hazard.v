@@ -20,17 +20,17 @@ module HazardUnit(
 );
 
         always @ (*) begin
-                if          ((rs1_addr_execute == rd_addr_mem) & rd_write_mem) begin
+                if          ((rs1_addr_execute == rd_addr_mem) & rd_write_mem & (rd_addr_mem != 5'b0)) begin
                         forward_control_src1 <= `FWD_MEM;
-                end else if ((rs1_addr_execute == rd_addr_wb)  & rd_write_wb)  begin
+                end else if ((rs1_addr_execute == rd_addr_wb)  & rd_write_wb  & (rd_addr_wb  != 5'b0))  begin
                         forward_control_src1 <= `FWD_WB;
                 end else begin
                         forward_control_src1 <= `RS_DATA;
                 end
 
-                if          ((rs2_addr_execute == rd_addr_mem) & rd_write_mem) begin
+                if          ((rs2_addr_execute == rd_addr_mem) & rd_write_mem & (rd_addr_mem != 5'b0)) begin
                         forward_control_src2 <= `FWD_MEM;
-                end else if ((rs2_addr_execute == rd_addr_wb)  & rd_write_wb)  begin
+                end else if ((rs2_addr_execute == rd_addr_wb)  & rd_write_wb  & (rd_addr_wb  != 5'b0))  begin
                         forward_control_src2 <= `FWD_WB;
                 end else begin
                         forward_control_src2 <= `RS_DATA;

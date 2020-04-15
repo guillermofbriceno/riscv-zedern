@@ -4,6 +4,7 @@
 module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=1024) (
         input clk,
         input read_enable,
+        input stall,
         input [9:0] address_p1,
         input [9:0] address_p2,
         output reg [31:0] data_out_p1,
@@ -20,7 +21,9 @@ module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=102
 
         always @(posedge clk) begin
                 if (read_enable) begin
-                        data_out_p1 <= {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
+                        if (!stall) begin
+                                data_out_p1 <= {memory[address_p1+3], memory[address_p1+2], memory[address_p1+1], memory[address_p1]};
+                        end
                 end else begin
                         data_out_p1 <= 32'b0;
                 end

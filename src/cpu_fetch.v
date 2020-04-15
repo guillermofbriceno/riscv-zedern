@@ -9,15 +9,15 @@ module Fetch(
         input [0:0]  taken
 );
         reg [31:0] pc_next;
-        reg [31:0] pc = 32'h110;
+        reg [31:0] pc = 32'h310;
 
         assign instruction_address = pc[9:0];
 
         always @ (posedge clk) begin
                 if (!stall) begin
                         pc <= pc_next;
+                        pc_out <= pc;
                 end
-                pc_out <= pc;
         end
 
         always @ (*) begin

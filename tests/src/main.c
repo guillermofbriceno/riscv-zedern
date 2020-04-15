@@ -21,17 +21,17 @@ int main() {
         int primes[LIMIT+1];
 
         //populating array with naturals LIMITs
-        for(i = 2; i<=LIMIT; i++)
+        for(i = 2; i <= LIMIT; i++)
                 primes[i] = i;
 
         i = 2;
         while ((i*i) <= LIMIT) {
                 if (primes[i] != 0) {
-                        for(j=2; j<LIMIT; j++) {
-                                if (primes[i]*j > LIMIT)
+                        for(j = 2; j < LIMIT; j++) {
+                                if (primes[i] * j > LIMIT)
                                         break;
                                 else
-                                primes[primes[i]*j]=0;
+                                        primes[primes[i] * j] = 0;
                         }
                 }
                 i++;

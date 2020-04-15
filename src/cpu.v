@@ -11,6 +11,7 @@ module RV32I_CPU(
         input   wire [31:0]  data_in,
         output  wire [31:0]  data_out,
         output  wire [03:0]  width,
+        output  wire [00:0]  mem_stall,
         output  wire [09:0]  instruction_address,
         output  wire [09:0]  data_address,
         output               write_mem,
@@ -29,6 +30,8 @@ module RV32I_CPU(
                 wire [00:0]  flush_ex;
                 wire [00:0]  flush_fe;
                 reg  [00:0]  dec_stall = 0;
+
+        assign mem_stall = pc_stall;
 
         Fetch fetch_stage(
                 .clk(clk),

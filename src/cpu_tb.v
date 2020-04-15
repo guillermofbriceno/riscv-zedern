@@ -17,6 +17,8 @@ module cpu_tb();
         wire [31:0] data_mem_data;
         wire [ 7:0]  leds;
         wire [ 0:0] read_inst_enable;
+        wire [ 0:0] mem_stall;
+
 
 
         RV32I_CPU CPU(
@@ -28,7 +30,8 @@ module cpu_tb();
                 .write_mem(write),
                 .instruction_address(instruction_address),
                 .data_address(data_address),
-                .read_inst_enable(read_inst_enable)
+                .read_inst_enable(read_inst_enable),
+                .mem_stall(mem_stall)
         );
 
         InstructionMemory BOOTROM(
@@ -37,7 +40,8 @@ module cpu_tb();
                 .address_p1(instruction_address),
                 .address_p2(data_address),
                 .data_out_p1(instruction),
-                .data_out_p2(inst_mem_data)
+                .data_out_p2(inst_mem_data),
+                .stall(mem_stall)
         );
 
         DataMemory DATAMEM(
@@ -51,8 +55,9 @@ module cpu_tb();
 
         always @(*) begin
                 case (data_address[9])
-                        1'b0: data_in = inst_mem_data;
+                        //1'b0: data_in = inst_mem_data;
                         1'b1: data_in = data_mem_data;
+                        1'b0: data_in = data_mem_data;
                 endcase
         end
 

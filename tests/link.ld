@@ -6,7 +6,7 @@ MEMORY {
      * RAM (rwx) : ORIGIN = 0x2000000, LENGTH = 0x1000
     */
 
-     FLASH (rx) : ORIGIN = 0x000, LENGTH = 0x400
+     FLASH (rx) : ORIGIN = 0x200, LENGTH = 0x400
      RAM (rwx) : ORIGIN = 0x404, LENGTH = 0x400
 
 }
