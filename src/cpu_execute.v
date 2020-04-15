@@ -36,6 +36,7 @@ module Execute(
         output  reg  [ 1:0]  wb_mux_out,
         output  reg  [31:0]  target,
         output  wire [00:0]  taken,
+        output  reg  [31:0]  pc_out,
 
         input   wire [ 0:0]  flush
 );
@@ -53,6 +54,7 @@ module Execute(
                 rd_addr_out     <= rd_addr;
                 alu_out_clocked <= alu_out;
                 rs2_out         <= rs2;
+                pc_out          <= pc;
 
                 if (flush) begin
                         reg_write_out   <= 0;

@@ -14,8 +14,8 @@ module InstructionMemory #(parameter bits_data = 32, bits_addr = 10, entries=102
         //reg [7:0] memory [0:entries - 1];
 
         initial begin
-                //$readmemh("/home/guillermo/programming/riscv-zedern/scripts/c_image.hex", memory);
-                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/image.hex", memory);
+                $readmemh("/home/guillermo/programming/riscv-zedern/scripts/c_image.hex", memory);
+                //$readmemh("/home/guillermo/programming/riscv-zedern/scripts/image.hex", memory);
         end
 
         always @(posedge clk) begin

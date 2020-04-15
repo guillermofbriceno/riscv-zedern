@@ -1,6 +1,6 @@
 #include "hw_macros.h"
 
-#define LIMIT 20
+#define LIMIT 11
 //#define LIMIT 11
 
 //unsigned int __mulsi3 (unsigned int a, unsigned int b) {
@@ -42,7 +42,7 @@ int main() {
                 if (primes[i]!=0) {
                         //MEM(0x450 + (count * 4)) = primes[i];
                         MEM(0x450) = primes[i];
-                        for (j = 0; j < 100000; j++){asm("");}
+                        for (j = 0; j < 10; j++){asm("");}
                         //for (j = 0; j < 120; j++){asm("");}
                         count++;
                 

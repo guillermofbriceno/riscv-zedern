@@ -73,7 +73,7 @@ module cpu_tb();
                 $dumpvars(0, LEDS);
                 #41.665;
                 //$display("%d",instruction_address);
-                for (i=0; i < 1000; i=i+1) begin
+                for (i=0; i < 5000; i=i+1) begin
                         clk = 1;
                         #41.665;
                         clk = 0;

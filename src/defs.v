@@ -83,17 +83,17 @@
 `define JAL             12'h100
 `define JALR            12'h200
 
-//                          B A98 7 6 5 43 21 0     
-`define LUI_CTRL        12'b0_000_0_0_1_00_00_0
-`define AUIPC_CTRL      12'b0_000_0_0_1_00_11_0
-`define STRS_CTRL       12'b1_000_0_0_0_00_01_1
-`define ALUI_CTRL       12'b0_000_0_1_1_00_10_1
-`define ALUR_CTRL       12'b0_000_1_1_1_00_00_1
-`define LODS_CTRL       12'b0_000_0_0_1_10_10_1
-`define NOP             12'b0_000_0_0_0_00_00_0
-`define BRCH_CTRL       12'b0_001_0_0_0_00_00_1
-`define JAL_CTRL        12'b0_010_0_0_1_01_00_0
-`define JALR_CTRL       12'b0_100_0_0_1_01_00_0 //Implementation not verified
+//                          C B A98 7 6 5 43 21 0     
+`define LUI_CTRL        13'b0_0_000_0_0_1_00_00_0
+`define AUIPC_CTRL      13'b0_0_000_0_0_1_00_11_0
+`define STRS_CTRL       13'b0_1_000_0_0_0_00_01_1
+`define ALUI_CTRL       13'b0_0_000_0_1_1_00_10_1
+`define ALUR_CTRL       13'b0_0_000_1_1_1_00_00_1
+`define LODS_CTRL       13'b1_0_000_0_0_1_10_10_1
+`define NOP             13'b0_0_000_0_0_0_00_00_0
+`define BRCH_CTRL       13'b0_0_001_0_0_0_00_00_1
+`define JAL_CTRL        13'b0_0_010_0_0_1_01_00_0
+`define JALR_CTRL       13'b0_0_100_0_0_1_01_00_0 //Implementation not verified
 
 
 // Control signal indexes
@@ -134,6 +134,8 @@
 `define COND_BR_IDX     8
 
 `define MEMWRITE_SIG    11:11
+
+`define LOAD_SIG        12:12
 
 
 //Condition Indexes

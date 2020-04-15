@@ -9,7 +9,7 @@ module Fetch(
         input [0:0]  taken
 );
         reg [31:0] pc_next;
-        reg [31:0] pc = 32'b00;
+        reg [31:0] pc = 32'h110;
 
         assign instruction_address = pc[9:0];
 

@@ -24,12 +24,11 @@ module RV32I_CPU(
                 wire [31:0]  target;
                 wire [00:0]  taken;
                 wire [00:0]  pc_stall;
+                //wire [00:0]  fe_stall;
                 wire [00:0]  flush_dec;
                 wire [00:0]  flush_ex;
                 wire [00:0]  flush_fe;
-                reg  [03:0]  width_reg = 4'b1;
                 reg  [00:0]  dec_stall = 0;
-                assign width = width_reg;
 
         Fetch fetch_stage(
                 .clk(clk),
@@ -70,7 +69,8 @@ module RV32I_CPU(
                 .wb_mux(wb_mux_execute),
                 .flush(flush_dec),
                 .stall(dec_stall),
-                .branch_control(branch_control)
+                .branch_control(branch_control),
+                .load_ex(load_ex)
         );
 
                 wire [31:0]  rs1_data_execute;
@@ -93,6 +93,7 @@ module RV32I_CPU(
                 wire [00:0]  mem_write_execute;
                 wire [31:0]  rd_data;
                 wire [01:0]  wb_mux_execute;
+                wire [00:0]  load_ex;
 
         Execute execute_stage(
                 .clk(clk),
@@ -110,6 +111,7 @@ module RV32I_CPU(
                 .imm_b_noext(imm_b_noext),
                 .imm_j_noext(imm_j_noext),
                 .pc(pc_execute),
+                .pc_out(pc_mem),
                 .forward_mem(forward_mem),
                 .forward_wb(forward_wb),
                 .forward_control_src1(forward_control_src1),
@@ -121,7 +123,7 @@ module RV32I_CPU(
                 .reg_write_out(reg_write_memory),
                 .mem_write_out(write_mem),
                 .alu_out_clocked(alu_out),
-                .rs2_out(data_out),
+                .rs2_out(data_out_mem),
                 .wb_mux(wb_mux_execute),
                 .wb_mux_out(wb_mux_memory),
                 .taken(taken),
@@ -135,6 +137,8 @@ module RV32I_CPU(
                 wire [00:0]  reg_write_memory;
                 wire [01:0]  wb_mux_memory;
                 wire [02:0]  funct3_mem;
+                wire [31:0]  data_out_mem;
+                wire [31:0]  pc_mem;
 
         MemoryStage memory_stage(
                .clk(clk),
@@ -143,11 +147,16 @@ module RV32I_CPU(
                .reg_write(reg_write_memory),
                .wb_mux(wb_mux_memory),
                .funct3(funct3_mem),
+               .rs2_out(data_out_mem),
                .alu_out_wb(alu_out_wb),
                .rd_addr_out(rd_addr),
                .reg_write_out(reg_write),
                .wb_mux_out(wb_mux),
-               .funct3_out(funct3_wb)
+               .funct3_out(funct3_wb),
+               .width(width),
+               .data_out(data_out),
+               .pc(pc_mem),
+               .pc_out(pc_wb)
         );
         
                 wire [31:0]  alu_out_wb;
@@ -155,13 +164,15 @@ module RV32I_CPU(
                 wire [00:0]  reg_write;
                 wire [01:0]  wb_mux;
                 wire [02:0]  funct3_wb;
+                wire [31:0]  pc_wb;
 
         Writeback writeback_stage(
                 .alu_out(alu_out_wb),
                 .data_in(data_in),
                 .wb_mux(wb_mux),
                 .rd_data(rd_data),
-                .funct3(funct3_wb)
+                .funct3(funct3_wb),
+                .pc(pc_wb)
         );
 
         assign read_inst_enable = ~flush_fe;
@@ -175,9 +186,11 @@ module RV32I_CPU(
                 .rd_write_wb(reg_write),
                 .forward_control_src1(forward_control_src1),
                 .forward_control_src2(forward_control_src2),
+                .load(load_ex),
 
                 .taken(taken),
                 .pc_stall(pc_stall),
+                //.fe_stall(fe_stall),
                 .flush_dec(flush_dec),
                 .flush_fe(flush_fe)
         );

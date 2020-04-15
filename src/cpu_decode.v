@@ -23,7 +23,8 @@ module Decode(
         output  reg  [ 0:0]  reg_write_out,
         output  reg  [ 0:0]  mem_write,
         output  reg  [ 1:0]  wb_mux,
-        output  reg  [ 2:0] branch_control,
+        output  reg  [ 2:0]  branch_control,
+        output  reg  [ 0:0]  load_ex,
         input   wire [31:0]  rd_data,
         input   wire [ 4:0]  rd_addr,
         input   wire [ 0:0]  reg_write,
@@ -31,7 +32,7 @@ module Decode(
         input   wire [ 0:0]  stall
         );
                 wire [09:0] alu_func_s;
-                reg  [11:0] control;
+                reg  [12:0] control;
                 wire [09:0] instruction_type;
                 wire [ 4:0] rs1_addr;
                 wire [ 4:0] rs2_addr;
@@ -64,6 +65,7 @@ module Decode(
                                 wb_mux         <= 2'b0;
                                 funct3         <= 3'b0;
                                 branch_control <= 3'b0;
+                                load_ex        <= 1'b0;
                         end else begin
                                 alu_func       <= control[`ALU_FUNC_MUX]  ? alu_func_s : 10'b0;
                                 reg_write_out  <= control[`REGWRITE_SIG];
@@ -71,6 +73,7 @@ module Decode(
                                 wb_mux         <= control[`WRB_REGF_MUX];
                                 funct3         <= instruction[14:12];
                                 branch_control <= control[`BRANCH_ENC];
+                                load_ex        <= control[`LOAD_SIG];
                         end
                 end
         end

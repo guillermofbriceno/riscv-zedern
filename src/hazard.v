@@ -8,10 +8,12 @@ module HazardUnit(
         input   wire [4:0]  rd_addr_wb,
         input   wire [0:0]  rd_write_wb,
         input   wire [0:0]  taken,
+        input   wire [0:0]  load,
 
         output  reg  [1:0]  forward_control_src1,
         output  reg  [1:0]  forward_control_src2,
         output  reg  [0:0]  pc_stall = 0,
+        //output  reg  [0:0]  fe_stall = 0,
         output  reg  [0:0]  flush_dec= 0,
         output  reg  [0:0]  flush_fe = 0,
         output  reg  [0:0]  flush_ex = 0
@@ -37,9 +39,15 @@ module HazardUnit(
                 if (taken) begin
                         flush_fe  <= 1;
                         flush_dec <= 1;
+                end else if (load) begin
+                        flush_dec <= 1;
+                        pc_stall  <= 1;
+                        //fe_stall  <= 1;
                 end else begin
                         flush_fe  <= 0;
                         flush_dec <= 0;
+                        pc_stall  <= 0;
+                        //fe_stall  <= 0;
                 end
         end
 
