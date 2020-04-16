@@ -36,19 +36,37 @@ module HazardUnit(
                         forward_control_src2 <= `RS_DATA;
                 end
 
-                if (taken) begin
-                        flush_fe  <= 1;
-                        flush_dec <= 1;
-                end else if (load) begin
-                        flush_dec <= 1;
-                        pc_stall  <= 1;
-                        //fe_stall  <= 1;
-                end else begin
-                        flush_fe  <= 0;
-                        flush_dec <= 0;
-                        pc_stall  <= 0;
-                        //fe_stall  <= 0;
-                end
+                case ({taken, load})
+                        2'b10: begin
+                                flush_fe  <= 1;
+                                flush_dec <= 1;
+                                pc_stall  <= 0;
+                        end
+                        2'b01: begin
+                                flush_fe  <= 0;
+                                flush_dec <= 1;
+                                pc_stall  <= 1;
+                        end
+                        default begin
+                                flush_fe  <= 0;
+                                flush_dec <= 0;
+                                pc_stall  <= 0;
+                        end
+                endcase
+
+                //if (taken) begin
+                //        flush_fe  <= 1;
+                //        flush_dec <= 1;
+                //end else if (load) begin
+                //        flush_dec <= 1;
+                //        pc_stall  <= 1;
+                //        //fe_stall  <= 1;
+                //end else begin
+                //        flush_fe  <= 0;
+                //        flush_dec <= 0;
+                //        pc_stall  <= 0;
+                //        //fe_stall  <= 0;
+                //end
         end
 
 endmodule

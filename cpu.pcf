@@ -1,5 +1,6 @@
 #set_io  hwclk             C16
-set_io --warn-no-port clk               J3
+#set_io --warn-no-port clk               J3
+set_io --warn-no-port clk               C16
 set_io --warn-no-port leds[7]           B5
 set_io --warn-no-port leds[6]           B4
 set_io --warn-no-port leds[5]           A2

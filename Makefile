@@ -26,7 +26,7 @@ gui:
 	nextpnr-ice40 --hx8k --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc --pcf-allow-unconstrained --gui
 
 yo:
-	yosys -p 'synth_ice40 -top $(TOP) -json $(BUILD)/$(PROJ).json -noflatten' $(FILES)
+	yosys -p 'synth_ice40 -top $(TOP) -json $(BUILD)/$(PROJ).json' $(FILES)
 
 pnr:
 	nextpnr-ice40 --hx8k --package ct256 --json $(BUILD)/$(PROJ).json --pcf $(PROJ).pcf --asc $(BUILD)/$(PROJ).asc

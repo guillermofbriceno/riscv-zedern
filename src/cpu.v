@@ -7,7 +7,7 @@
 
 module RV32I_CPU(
         input                clk,
-        input   wire [31:0]  instruction,
+        input   wire [31:0]  instruction_in,
         input   wire [31:0]  data_in,
         output  wire [31:0]  data_out,
         output  wire [03:0]  width,
@@ -30,6 +30,7 @@ module RV32I_CPU(
                 wire [00:0]  flush_ex;
                 wire [00:0]  flush_fe;
                 reg  [00:0]  dec_stall = 0;
+                wire [31:0]  instruction;
 
         assign mem_stall = pc_stall;
 
@@ -39,8 +40,11 @@ module RV32I_CPU(
                 .instruction_address(instruction_address),
                 .pc_out(pc_decode),
                 .target(target),
-                .taken(taken)
-                //.flush(flush_fe)
+                .taken(taken),
+                .instruction_in(instruction_in),
+                .instruction_out(instruction),
+
+                .flush(flush_fe)
         );
 
                 wire [31:0] pc_decode;
