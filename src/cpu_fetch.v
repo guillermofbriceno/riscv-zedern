@@ -13,6 +13,8 @@ module Fetch(
 );
         reg [31:0] pc_next;
         reg [31:0] pc;
+        reg [31:0] count = 0;
+        reg start = 0;
 
         initial begin 
                 pc              <= 32'h00000314;
@@ -24,24 +26,22 @@ module Fetch(
         assign instruction_address = pc[9:0];
 
         always @ (posedge clk) begin
-                if (!stall) begin
+                if (!start) begin
+                        count <= count + 1;
+                end else if (!stall) begin
                         pc <= pc_next;
                         //pc_out_fe2 <= pc;
                         pc_out <= pc;
                 end
         end
 
-        //always @ (posedge clk) begin
-        //        if (!flush) begin
-        //                if (!stall) begin
-        //                        pc_out <= pc_out_fe2;
-        //                        instruction_out <= instruction_in;
-        //                end
-        //        end else begin
-        //                instruction_out <= 32'b0;
-        //                pc_out <= 32'b0;
-        //        end
-        //end
+        always @ (*) begin
+                if (count > 32'h00000FFF) begin
+                        start <= 1;
+                end else begin
+                        start <= 0;
+                end
+        end
 
         always @ (*) begin
                 if (taken) begin

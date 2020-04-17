@@ -42,7 +42,7 @@ int main() {
                 if (primes[i]!=0) {
                         //MEM(0x450 + (count * 4)) = primes[i];
                         MEM(0x450) = primes[i];
-                        for (j = 0; j < 12000; j++){asm("");}
+                        for (j = 0; j < 1200000; j++){asm("");}
                         //for (j = 0; j < 120; j++){asm("");}
                         count++;
                 
