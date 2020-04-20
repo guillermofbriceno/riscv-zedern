@@ -1,0 +1,6 @@
+set_io clk   J3
+set_io hsync C16
+set_io vsync D16
+set_io red   G16
+set_io green H16
+set_io blue  J15
